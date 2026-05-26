@@ -131,7 +131,7 @@ export default function DashboardClient({ initialGcpData, initialTrend }: Props)
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/recommendations')
+      const res = await fetch('/gcp-cost-analysis/api/recommendations')
       if (!res.ok) throw new Error('API request failed')
       const json = await res.json()
       setAnalysis(json.analysis)
