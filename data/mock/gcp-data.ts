@@ -24,10 +24,10 @@ export const mockGCPData: GCPData = {
       avgCpuUtilization: 18,
     },
     {
-      id: 'cr-social-spectrum-api',
-      name: 'social-spectrum-api',
+      id: 'cr-sko-assets-api',
+      name: 'sko-assets-api',
       region: 'australia-southeast1',
-      currentRevision: 'social-spectrum-api-00048-rtz',
+      currentRevision: 'sko-assets-api-00048-rtz',
       totalRevisions: 48,
       inactiveRevisions: 14,
       cpuAllocation: 'always',
@@ -82,7 +82,7 @@ export const mockGCPData: GCPData = {
     },
     {
       id: 'bkt-user-uploads',
-      name: 'social-spectrum-uploads',
+      name: 'sko-assets-uploads',
       location: 'australia-southeast1',
       storageClass: 'STANDARD',
       sizeGB: 180,
