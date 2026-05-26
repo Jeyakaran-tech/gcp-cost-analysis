@@ -119,6 +119,71 @@ function RecCard({ rec, index }: { rec: Recommendation; index: number }) {
   )
 }
 
+function buildPrompt(data: GCPData): string {
+  return `You are a GCP cost optimisation expert. Analyse this Google Cloud Platform usage data and return actionable cost-saving recommendations.
+
+PROJECT: ${data.projectName} (${data.projectId})
+BILLING PERIOD: ${data.billingPeriod}
+TOTAL SPEND: $${data.totalMonthlyCost} MTD / $${data.projectedMonthCost} projected
+
+=== CLOUD RUN SERVICES ===
+${data.cloudRun.map(s => `
+Service: ${s.name} (${s.region})
+  - Monthly cost: $${s.monthlyCost}
+  - CPU allocation: ${s.cpuAllocation}
+  - Min instances: ${s.minInstances}
+  - Total revisions: ${s.totalRevisions}, Inactive: ${s.inactiveRevisions}
+  - Avg CPU utilization: ${s.avgCpuUtilization}%
+  - Requests/day: ${s.requestsPerDay}
+`).join('')}
+
+=== CLOUD STORAGE BUCKETS ===
+${data.storage.map(b => `
+Bucket: ${b.name} (${b.location})
+  - Monthly cost: $${b.monthlyCost}
+  - Storage class: ${b.storageClass}
+  - Size: ${b.sizeGB} GB, Objects: ${b.objectCount}
+  - Last accessed: ${b.lastAccessedDaysAgo} days ago
+  - Lifecycle rules: ${b.hasLifecycleRules ? 'YES' : 'NONE'}
+  - Read ops/month: ${b.readOperationsPerMonth}
+`).join('')}
+
+=== BIGQUERY DATASETS ===
+${data.bigquery.map(d => `
+Dataset: ${d.name} (${d.location})
+  - Query cost: $${d.monthlyQueryCost}/mo, Storage: $${d.monthlyStorageCost}/mo
+  - Tables:
+  ${d.tables.map(t => `    - ${t.name}: ${t.sizeGB}GB, partitioned=${t.isPartitioned}, clustered=${t.isClustered}, scans ${t.avgDailyQueryScansGB}GB/day`).join('\n')}
+`).join('')}
+
+Respond ONLY with a valid JSON object (no markdown, no backticks) in this exact structure:
+{
+  "summary": "2-3 sentence executive summary of the cost situation",
+  "totalPotentialSaving": <number in USD per month>,
+  "recommendations": [
+    {
+      "id": "rec-001",
+      "service": "Cloud Run" | "Cloud Storage" | "BigQuery",
+      "priority": "critical" | "high" | "medium" | "low",
+      "title": "Short action title",
+      "description": "1-2 sentence explanation of the issue",
+      "action": "Specific step to take",
+      "estimatedMonthlySaving": <number>,
+      "estimatedEffort": "low" | "medium" | "high",
+      "resourceId": "the resource name/id"
+    }
+  ],
+  "generatedAt": "${new Date().toISOString()}"
+}
+
+Rules:
+- Order recommendations by estimatedMonthlySaving descending
+- Be specific — reference actual resource names and numbers from the data
+- Only include recommendations with clear, actionable steps
+- Limit to maximum 8 recommendations
+- estimatedMonthlySaving must be realistic based on actual costs in the data`
+}
+
 export default function DashboardClient({ initialGcpData, initialTrend }: Props) {
   const [gcpData] = useState(initialGcpData)
   const [trend] = useState(initialTrend)
@@ -131,17 +196,41 @@ export default function DashboardClient({ initialGcpData, initialTrend }: Props)
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/gcp-cost-analysis/api/recommendations')
-      if (!res.ok) throw new Error('API request failed')
-      const json = await res.json()
-      setAnalysis(json.analysis)
+      const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY
+      if (!apiKey) throw new Error('Missing NEXT_PUBLIC_ANTHROPIC_API_KEY')
+
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 2000,
+          messages: [{ role: 'user', content: buildPrompt(gcpData) }],
+        }),
+      })
+      if (!res.ok) throw new Error(`Anthropic API error: ${res.status}`)
+      const data = await res.json()
+
+      const rawText: string = data.content
+        .filter((b: { type: string }) => b.type === 'text')
+        .map((b: { type: string; text: string }) => b.text)
+        .join('')
+
+      const clean = rawText.replace(/```json|```/g, '').trim()
+      setAnalysis(JSON.parse(clean))
       setLastRun(new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }))
     } catch (e) {
-      setError('Failed to fetch recommendations. Check your ANTHROPIC_API_KEY.')
+      const msg = e instanceof Error ? e.message : String(e)
+      setError(`Failed to fetch recommendations: ${msg}`)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [gcpData])
 
   const totalCloudRun = gcpData.cloudRun.reduce((s, x) => s + x.monthlyCost, 0)
   const totalStorage = gcpData.storage.reduce((s, x) => s + x.monthlyCost, 0)
