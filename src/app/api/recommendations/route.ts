@@ -80,9 +80,13 @@ export async function POST() {
 
     const message = await client.messages.create({
       model: 'claude-sonnet-5',
-      max_tokens: 4096,
+      max_tokens: 8192,
       messages: [{ role: 'user', content: prompt }],
     })
+
+    if (message.stop_reason === 'max_tokens') {
+      throw new Error('Response truncated: max_tokens too low for this dataset')
+    }
 
     const rawText = message.content
       .filter(block => block.type === 'text')
