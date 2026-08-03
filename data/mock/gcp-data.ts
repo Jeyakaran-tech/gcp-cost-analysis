@@ -2,7 +2,7 @@ import { GCPData } from '@/types'
 
 export const mockGCPData: GCPData = {
   projectId: 'envaedha-prod-8821',
-  projectName: 'Envaedha Production',
+  projectName: 'Production',
   billingPeriod: 'May 2026',
   totalMonthlyCost: 4218,
   projectedMonthCost: 6340,

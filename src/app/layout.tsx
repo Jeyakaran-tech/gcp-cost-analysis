@@ -5,7 +5,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'GCP Cost Monitor — Envaedha',
+  title: 'Cloud Cost Monitor',
   description: 'AI-powered GCP cost monitoring and optimisation',
 }
 

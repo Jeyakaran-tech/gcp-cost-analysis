@@ -20,22 +20,22 @@ interface Props {
 
 const PRIORITY_CONFIG = {
   critical: { label: 'Critical', color: '#f87171', bg: '#f8717115', border: '#f8717130' },
-  high:     { label: 'High',     color: '#fbbf24', bg: '#fbbf2415', border: '#fbbf2430' },
-  medium:   { label: 'Medium',   color: '#60a5fa', bg: '#60a5fa15', border: '#60a5fa30' },
-  low:      { label: 'Low',      color: '#8888aa', bg: '#8888aa10', border: '#8888aa25' },
+  high: { label: 'High', color: '#fbbf24', bg: '#fbbf2415', border: '#fbbf2430' },
+  medium: { label: 'Medium', color: '#60a5fa', bg: '#60a5fa15', border: '#60a5fa30' },
+  low: { label: 'Low', color: '#8888aa', bg: '#8888aa10', border: '#8888aa25' },
 }
 
 const EFFORT_LABEL = { low: '~1 hr', medium: '~1 day', high: '~1 week' }
 
 const SERVICE_ICON = {
-  'Cloud Run':     <Server size={13} />,
+  'Cloud Run': <Server size={13} />,
   'Cloud Storage': <HardDrive size={13} />,
-  'BigQuery':      <Database size={13} />,
+  'BigQuery': <Database size={13} />,
 }
 
 const CHART_COLORS = {
   cloudRun: '#a78bfa',
-  storage:  '#4ade80',
+  storage: '#4ade80',
   bigquery: '#fbbf24',
 }
 
@@ -151,8 +151,8 @@ export default function DashboardClient({ initialGcpData, initialTrend }: Props)
 
   const serviceBreakdown = [
     { name: 'Cloud Run', cost: totalCloudRun, pct: Math.round((totalCloudRun / gcpData.totalMonthlyCost) * 100), color: CHART_COLORS.cloudRun },
-    { name: 'BigQuery',  cost: totalBQ,       pct: Math.round((totalBQ       / gcpData.totalMonthlyCost) * 100), color: CHART_COLORS.bigquery },
-    { name: 'Storage',   cost: totalStorage,  pct: Math.round((totalStorage  / gcpData.totalMonthlyCost) * 100), color: CHART_COLORS.storage },
+    { name: 'BigQuery', cost: totalBQ, pct: Math.round((totalBQ / gcpData.totalMonthlyCost) * 100), color: CHART_COLORS.bigquery },
+    { name: 'Storage', cost: totalStorage, pct: Math.round((totalStorage / gcpData.totalMonthlyCost) * 100), color: CHART_COLORS.storage },
   ]
 
   return (
@@ -243,9 +243,9 @@ export default function DashboardClient({ initialGcpData, initialTrend }: Props)
                   labelStyle={{ color: '#8888aa' }}
                   formatter={(v: number) => [`$${v}`, '']}
                 />
-                <Bar dataKey="cloudRun" stackId="a" fill={CHART_COLORS.cloudRun} radius={[0,0,0,0]} />
-                <Bar dataKey="storage"  stackId="a" fill={CHART_COLORS.storage}  radius={[0,0,0,0]} />
-                <Bar dataKey="bigquery" stackId="a" fill={CHART_COLORS.bigquery}  radius={[4,4,0,0]} />
+                <Bar dataKey="cloudRun" stackId="a" fill={CHART_COLORS.cloudRun} radius={[0, 0, 0, 0]} />
+                <Bar dataKey="storage" stackId="a" fill={CHART_COLORS.storage} radius={[0, 0, 0, 0]} />
+                <Bar dataKey="bigquery" stackId="a" fill={CHART_COLORS.bigquery} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -352,9 +352,6 @@ export default function DashboardClient({ initialGcpData, initialTrend }: Props)
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
             <Clock size={11} className="inline mr-1" />
             Mock data mode · Phase 2: connect real GCP Billing API
-          </p>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Powered by Claude claude-sonnet-4 · Envaedha
           </p>
         </div>
       </div>
