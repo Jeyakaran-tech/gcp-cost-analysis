@@ -131,7 +131,7 @@ export default function DashboardClient({ initialGcpData, initialTrend }: Props)
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH}/api/recommendations`, { method: 'POST' })
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH}/api/recommendations/`, { method: 'POST' })
       if (!res.ok) throw new Error(`Recommendations API error: ${res.status}`)
       const data = await res.json()
 
